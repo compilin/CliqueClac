@@ -113,7 +113,7 @@
 
 */
 
-inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* numNonNeighbors,
+static inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* numNonNeighbors,
                                                 int* vertexSets, int* vertexLookup,
                                                 int** neighborsInP, int* numNeighbors,
                                                 int beginX, int beginP, int beginR)
@@ -127,7 +127,7 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
     while(j<beginR)
     {
         int vertex = vertexSets[j];
-        int numPotentialNeighbors = min(beginR - beginP, numNeighbors[vertex]);
+        int numPotentialNeighbors = minC(beginR - beginP, numNeighbors[vertex]);
 
         int numNeighborsInP = 0;
 
@@ -173,7 +173,7 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
     // we will decrement numNonNeighbors as we find neighbors
     *numNonNeighbors = beginR-beginP;
 
-    int numPivotNeighbors = min(beginR - beginP, numNeighbors[pivot]);
+    int numPivotNeighbors = minC(beginR - beginP, numNeighbors[pivot]);
 
     // mark the neighbors of pivot that are in P.
     j = 0;
@@ -254,7 +254,7 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
                       in vertexSets after adding vertex to R.
 */
 
-inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
+static inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
                                                    int* vertexSets, int* vertexLookup, 
                                                    NeighborListArray** orderingArray,
                                                    int** neighborsInP, int* numNeighbors,
@@ -305,7 +305,7 @@ inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
             vertexLookup[neighbor] = *pNewBeginX;
 
             Free(neighborsInP[neighbor]);
-            neighborsInP[neighbor] = Calloc(min(*pNewBeginR-*pNewBeginP,orderingArray[neighbor]->laterDegree), sizeof(int));
+            neighborsInP[neighbor] = Calloc(minC(*pNewBeginR-*pNewBeginP,orderingArray[neighbor]->laterDegree), sizeof(int));
             numNeighbors[neighbor] = 0;
 
             // fill in NeighborsInP
@@ -334,7 +334,7 @@ inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
             int vertexInP = vertexSets[j];
             numNeighbors[vertexInP] = 0;
             Free(neighborsInP[vertexInP]);
-            neighborsInP[vertexInP]=Calloc( min( *pNewBeginR-*pNewBeginP, 
+            neighborsInP[vertexInP]=Calloc( minC( *pNewBeginR-*pNewBeginP, 
                                                  orderingArray[vertexInP]->laterDegree 
                                                + orderingArray[vertexInP]->earlierDegree), sizeof(int));
 
@@ -524,7 +524,7 @@ long listAllMaximalCliquesDegeneracy( LinkedList** adjList,
                       in vertexSets after adding vertex to R.
 */
 
-inline void moveToRDegeneracy( int vertex, 
+static inline void moveToRDegeneracy( int vertex,
                                int* vertexSets, int* vertexLookup, 
                                int** neighborsInP, int* numNeighbors,
                                int* pBeginX, int *pBeginP, int *pBeginR, 
@@ -554,7 +554,7 @@ inline void moveToRDegeneracy( int vertex,
 
             int incrementJ = 1;
 
-            int numPotentialNeighbors = min(sizeOfP, numNeighbors[neighbor]);
+            int numPotentialNeighbors = minC(sizeOfP, numNeighbors[neighbor]);
 
             int k = 0;
             while(k<numPotentialNeighbors)
@@ -581,7 +581,7 @@ inline void moveToRDegeneracy( int vertex,
             int neighbor = vertexSets[j];
             int neighborLocation = j;
 
-            int numPotentialNeighbors = min(sizeOfP, numNeighbors[neighbor]);
+            int numPotentialNeighbors = minC(sizeOfP, numNeighbors[neighbor]);
 
             int k = 0;
             while(k<numPotentialNeighbors)
@@ -607,7 +607,7 @@ inline void moveToRDegeneracy( int vertex,
         {
             int thisVertex = vertexSets[j];
 
-            int numPotentialNeighbors = min(sizeOfP, numNeighbors[thisVertex]);
+            int numPotentialNeighbors = minC(sizeOfP, numNeighbors[thisVertex]);
 
             int numNeighborsInP = 0;
 
@@ -647,7 +647,7 @@ inline void moveToRDegeneracy( int vertex,
 
 */
 
-inline void moveFromRToXDegeneracy( int vertex, 
+static inline void moveFromRToXDegeneracy( int vertex,
                                     int* vertexSets, int* vertexLookup, 
                                     int* pBeginX, int* pBeginP, int* pBeginR )
 {
@@ -774,7 +774,7 @@ void listAllMaximalCliquesDegeneracyRecursive( long* cliqueCount,
         #endif
 
         // remove vertex from partialCliques
-        delete(vertexLink);
+        deleteLink(vertexLink);
 
         moveFromRToXDegeneracy( vertex, 
                                 vertexSets, vertexLookup,

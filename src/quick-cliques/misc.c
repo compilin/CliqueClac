@@ -362,17 +362,17 @@ void runAndPrintStatsListList( long (*function)(LinkedList**,
 }
 
 /*! \brief process a clique, which may include printing it in
-           one of several formats and/or adding the 
+           one of several formats and/or adding the
            clique to a linked list.
 
-    \param cliques A linked list of cliques to return. <b>(only available when compiled 
+    \param cliques A linked list of cliques to return. <b>(only available when compiled
                    with RETURN_CLIQUES_ONE_BY_ONE defined)</b>
 
     \param clique the clique to add to the linked list
 
 */
 
-inline void processClique(
+void processClique(
                           #ifdef RETURN_CLIQUES_ONE_BY_ONE
                           LinkedList *cliques,
                           #endif

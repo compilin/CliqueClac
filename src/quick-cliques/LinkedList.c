@@ -169,7 +169,7 @@ Link* addBefore(Link* list, void* data)
             allocated by you, you need to free it..
 */
 
-void* delete(Link* list)
+void* deleteLink(Link* list)
 {
 #ifdef DEBUG
     printf("delete...\n");
@@ -511,7 +511,7 @@ void deleteLast(LinkedList* linkedList)
 {
     assert(linkedList != NULL);
     if(!isEmpty(linkedList))
-        delete(linkedList->tail->prev);
+        deleteLink(linkedList->tail->prev);
 
     return;
 }

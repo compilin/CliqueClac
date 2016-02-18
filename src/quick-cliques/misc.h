@@ -35,8 +35,8 @@
     \endhtmlonly
 */
 
-#define max(x,y) (x > y? x:y)
-#define min(x,y) (x < y? x:y)
+#define maxC(x,y) (x > y? x:y)
+#define minC(x,y) (x < y? x:y)
 
 int nodeComparator(void* node1, void* node2);
 
@@ -78,7 +78,7 @@ void runAndPrintStatsListList( long (*function)(LinkedList**,
                                int n );
 
 
-inline void processClique(
+void processClique(
                           #ifdef RETURN_CLIQUES_ONE_BY_ONE
                           LinkedList *cliques,
                           #endif

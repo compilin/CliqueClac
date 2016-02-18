@@ -75,7 +75,7 @@ int isHead(Link* list);
 
 int isTail(Link* list);
 
-void* delete(Link* list);
+void* deleteLink(Link* list);
 
 Link* addAfter(Link* list, void* data);
 

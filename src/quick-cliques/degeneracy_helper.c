@@ -86,11 +86,11 @@ int computeDegeneracy(LinkedList** list, int size)
     {
         if(!isEmpty(verticesByDegree[currentDegree]))
         {
-            degeneracy = max(degeneracy,currentDegree);
+            degeneracy = maxC(degeneracy,currentDegree);
             
             int vertex = (int) getFirst(verticesByDegree[currentDegree]);
 
-            delete(vertexLocator[vertex]);
+            deleteLink(vertexLocator[vertex]);
 
             degree[vertex] = -1;
 
@@ -104,7 +104,7 @@ int computeDegeneracy(LinkedList** list, int size)
 
                 if(degree[neighbor]!=-1)
                 {
-                    delete(vertexLocator[neighbor]);
+                    deleteLink(vertexLocator[neighbor]);
 
                     degree[neighbor]--;
 
@@ -200,11 +200,11 @@ NeighborList** computeDegeneracyOrderList(LinkedList** list, int size)
     {
         if(!isEmpty(verticesByDegree[currentDegree]))
         {
-            degeneracy = max(degeneracy,currentDegree);
+            degeneracy = maxC(degeneracy,currentDegree);
             
             int vertex = (int) getFirst(verticesByDegree[currentDegree]);
 
-            delete(vertexLocator[vertex]);
+            deleteLink(vertexLocator[vertex]);
 
             ordering[vertex]->vertex = vertex;
             ordering[vertex]->orderNumber = numVerticesRemoved;
@@ -222,7 +222,7 @@ NeighborList** computeDegeneracyOrderList(LinkedList** list, int size)
 
                 if(degree[neighbor]!=-1)
                 {
-                    delete(vertexLocator[neighbor]);
+                    deleteLink(vertexLocator[neighbor]);
                     addLast(ordering[vertex]->later, (void*)neighbor);
 
                     degree[neighbor]--;
@@ -318,11 +318,11 @@ NeighborListArray** computeDegeneracyOrderArray(LinkedList** list, int size)
     {
         if(!isEmpty(verticesByDegree[currentDegree]))
         {
-            degeneracy = max(degeneracy,currentDegree);
+            degeneracy = maxC(degeneracy,currentDegree);
             
             int vertex = (int) getFirst(verticesByDegree[currentDegree]);
 
-            delete(vertexLocator[vertex]);
+            deleteLink(vertexLocator[vertex]);
 
             ordering[vertex]->vertex = vertex;
             ordering[vertex]->orderNumber = numVerticesRemoved;
@@ -339,7 +339,7 @@ NeighborListArray** computeDegeneracyOrderArray(LinkedList** list, int size)
 
                 if(degree[neighbor]!=-1)
                 {
-                    delete(vertexLocator[neighbor]);
+                    deleteLink(vertexLocator[neighbor]);
                     addLast(ordering[vertex]->later, (void*)neighbor);
 
                     degree[neighbor]--;

@@ -759,7 +759,7 @@ void listAllMaximalCliquesHybridRecursive( long* cliqueCount,
         #endif
 
         // remove vertex from partialCliques
-        delete(vertexLink);
+        deleteLink(vertexLink);
 
         moveFromRToXHybrid( vertex, 
                             vertexSets, vertexLookup, 

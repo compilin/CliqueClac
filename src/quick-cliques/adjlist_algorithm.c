@@ -414,7 +414,7 @@ void listAllMaximalCliquesAdjacencyListRecursive( long* cliqueCount,
         #endif
 
         // remove vertex from partialCliques
-        delete(vertexLink);
+        deleteLink(vertexLink);
 
         // the location of vertex may have changed
         vertexLocation = vertexLookup[vertex];

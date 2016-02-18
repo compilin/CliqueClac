@@ -447,7 +447,7 @@ void listAllMaximalCliquesMatrixRecursive( long* cliqueCount,
         #endif
 
         // remove vertex from partialCliques
-        delete(vertexLink);
+        deleteLink(vertexLink);
 
         moveFromRToXMatrix( vertex, 
                             vertexSets, vertexLookup, 

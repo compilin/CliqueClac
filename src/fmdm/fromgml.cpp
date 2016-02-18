@@ -1,5 +1,6 @@
 #include <iostream>
-#include "parsegml.h"
+#include "parsegml.hpp"
+#include "dm.hpp"
 
 using namespace fmdm;
 
@@ -13,6 +14,6 @@ int main(int narg, char **arg) {
     auto R = decomposition_modulaire(G);
 
     if (narg > 2 && strcmp(arg[2], "-v") == 0)
-        printarbre(R);
+        printarbre(R, G.labels);
 
 }

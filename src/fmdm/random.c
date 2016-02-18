@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define VERBEUX 1
  
 //extern Node *decomposition_modulaire(int *,int);
-extern void printarbre(Node *);
+extern void printarbre(Node *N, labelFunction label);
 /* ppm est la part par million d'arretes voulues dans le graphe */
 
 void compte(Node *N, int level, int *C)
@@ -98,7 +98,7 @@ void test(int n, long int ppm, int *C)
 
   // affichage de l'arbre
   if(VERBEUX)
-    printarbre(R);
+    printarbre(R, G.labels);
 
   compte(R,0,C);
   printf("Statistiques sur l'arbre de decomposition:\n");

@@ -1,6 +1,6 @@
 #include <iostream>
-#include "fmdm/parsegml.h"
-#include "enumeratecliques.h"
+#include "fmdm/parsegml.hpp"
+#include "enumeratecliques.hpp"
 
 using namespace std;
 using namespace fmdm;

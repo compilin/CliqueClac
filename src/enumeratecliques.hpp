@@ -2,33 +2,32 @@
 // Created by Lauréline Nevin <git@compilin.dev> on 10/02/16.
 //
 
-#ifndef SIMPLECLIQUES_BRONKERBOSCH_H
-#define SIMPLECLIQUES_BRONKERBOSCH_H
-
-#include <functional>
-#include <list>
-#include <vector>
+#ifndef SIMPLECLIQUES_ENUMERATECLIQUES_H
+#define SIMPLECLIQUES_ENUMERATECLIQUES_H
+#include <iostream>
+#include <map>
 #include <deque>
+#include "quick-cliques/degeneracy_algorithm.hpp"
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include "fmdm/dm.hpp"
 
 namespace enumcliques {
-
-/**
- * \struct Clique
- * \brief Defines a clique.
- */
+	/**
+	 * \struct Clique
+	 * \brief Defines a clique.
+	 */
 	typedef std::vector<fmdm::VertexIdType> Clique;
 
-/**
- * \struct CliqueList
- * \brief Defines a list of cliques. Listed cliques are all allocated inside the data array pointed by data,
- * for easy freeing of memory.
- */
+	/**
+	 * \struct CliqueList
+	 * \brief Defines a list of cliques. Listed cliques are all allocated inside the data array pointed by data,
+	 * for easy freeing of memory.
+	 */
 	typedef std::vector<Clique> CliqueList;
 
-	std::vector<std::vector<fmdm::Node *>> enumeratePrime(fmdm::Graph & G, fmdm::Node & node);
 
+	CliqueList enumerateCliques(fmdm::Graph &G, fmdm::Node &node);
+	quickcliques::LinkedList **fmdmGraphToStrash(fmdm::Graph &input);
 	fmdm::VertexIdType getAnyLeaf(fmdm::Node *n);
 
 	template<typename T>
@@ -50,4 +49,5 @@ namespace enumcliques {
 	}
 }
 
-#endif //SIMPLECLIQUES_BRONKERBOSCH_H
+
+#endif //SIMPLECLIQUES_ENUMERATECLIQUES_H

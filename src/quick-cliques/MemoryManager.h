@@ -51,7 +51,7 @@ static void* MallocWithCheck(size_t x)
     #ifdef ALLOW_ALLOC_ZERO_BYTES
     void* retvalue = malloc(x);
     #else
-    void* retvalue = malloc(max(x,1));
+    void* retvalue = malloc(maxC(x,1));
     #endif
 
     if(retvalue==NULL)
@@ -78,7 +78,7 @@ static void* CallocWithCheck(size_t x, size_t y)
     #ifdef ALLOW_ALLOC_ZERO_BYTES
     void* retvalue = calloc(x,y); 
     #else
-    void* retvalue = calloc(max(x,1),max(y,1)); 
+    void* retvalue = calloc(maxC(x,1),maxC(y,1));
     #endif
 
     if(retvalue==NULL)
@@ -103,8 +103,8 @@ static void* CallocWithCheck(size_t x, size_t y)
 
     #else
 
-    #define Malloc(x) malloc(max(x,1))
-    #define Calloc(x,y) calloc(max(x,1),max(y,1))
+    #define Malloc(x) malloc(maxC(x,1))
+    #define Calloc(x,y) calloc(maxC(x,1),maxC(y,1))
     #define Free(x) free(x)
 
     #endif // ALLOW_ALLOC_ZERO_BYTES
