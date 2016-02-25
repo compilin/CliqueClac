@@ -5,7 +5,7 @@
 
 using namespace std;
 using namespace fmdm;
-namespace cc = cliqueclac;
+using namespace cliqueclac;
 
 int main(int argc, char **argv) {
 
@@ -18,13 +18,13 @@ int main(int argc, char **argv) {
 	auto dm_root = decomposition_modulaire(G);
 	printarbre(dm_root, G.labels);
 	cout << "MD tree to mdtree.gv" << endl;
-	cc::writeGraph(*cc::getIterator(dm_root, G.labels), "mdtree.gv", "GV", nullptr, "");
+	writeGraph(*getIterator(dm_root, G.labels), "mdtree.gv", "GV", nullptr, "");
 
 	cout << "Enumerating cliques with MD" << endl;
-	cc::CliqueList cliques = cc::enumerateCliques(G, *dm_root);
-	cc::sortCliqueList(cliques);
+	CliqueList cliques = enumerateCliques(G, *dm_root);
+	sortCliqueList(cliques);
 	auto out = ofstream("cliquelist_md.txt");
-	for (cc::Clique clique : cliques) {
+	for (Clique clique : cliques) {
 		cout << "[";
 		out << "[";
 		auto first = clique[0];
@@ -39,10 +39,10 @@ int main(int argc, char **argv) {
 
 
 	cout << "Enumerating cliques without MD" << endl;
-	cliques = cc::enumerateCliques(G);
-	cc::sortCliqueList(cliques);
+	cliques = enumerateCliques(G);
+	sortCliqueList(cliques);
 	out = ofstream("cliquelist_bk.txt");
-	for (cc::Clique clique : cliques) {
+	for (Clique clique : cliques) {
 		cout << "[";
 		out << "[";
 		auto first = clique[0];

@@ -115,3 +115,7 @@ fabric.properties
 doc/*
 !doc/Doxyfile
 doxygen_warnings.log
+*.gv
+*.graphml
+*.txt
+*.svg
