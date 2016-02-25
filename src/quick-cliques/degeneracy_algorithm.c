@@ -13,13 +13,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> 
 */
 
-#include<limits.h>
-#include<assert.h>
 #include<stdio.h>
 #include<stdlib.h>
 
 #include"misc.h"
-#include"LinkedList.h"
 #include"MemoryManager.h"
 #include"degeneracy_helper.h"
 #include"degeneracy_algorithm.h"
@@ -388,13 +385,13 @@ static inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderN
     \return the number of maximal cliques of the input graph.
 */
 
-long listAllMaximalCliquesDegeneracy( LinkedList** adjList, 
-                                      int** adjacencyList, 
+long listAllMaximalCliquesDegeneracy(LinkedList **adjList,
+                                     int **adjacencyList,
                                       #ifdef RETURN_CLIQUES_ONE_BY_ONE
-                                      LinkedList* cliques,
+                                     LinkedList *cliques,
                                       #endif
-                                      int* degree, 
-                                      int size)
+                                     int *degree,
+                                     int size)
 {
     // vertex sets are stored in an array like this:
     // |--X--|--P--|

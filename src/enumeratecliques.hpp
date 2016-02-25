@@ -11,7 +11,7 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include "fmdm/dm.hpp"
 
-namespace enumcliques {
+namespace cliqueclac {
 	/**
 	 * \struct Clique
 	 * \brief Defines a clique.
@@ -26,9 +26,16 @@ namespace enumcliques {
 	typedef std::vector<Clique> CliqueList;
 
 
-	CliqueList enumerateCliques(fmdm::Graph &G, fmdm::Node &node);
-	quickcliques::LinkedList **fmdmGraphToStrash(fmdm::Graph &input);
+	CliqueList enumerateCliques(const fmdm::Graph &G, fmdm::Node &node);
+
+	CliqueList enumerateCliques(const fmdm::Graph &G);
+
+	CliqueList enumerateCliques(const quickcliques::Graph &G);
+
+	quickcliques::Graph fmdmGraphToStrash(const fmdm::Graph &input);
 	fmdm::VertexIdType getAnyLeaf(fmdm::Node *n);
+
+	void sortCliqueList(CliqueList &list);
 
 	template<typename T>
 	void printNodes(T itIn, T itOut, fmdm::labelFunction labels) {

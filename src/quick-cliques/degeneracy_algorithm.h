@@ -52,12 +52,12 @@ void listAllMaximalCliquesDegeneracyRecursive( long* cliqueCount,
                                                int** neighborsInP, int* numNeighbors,
                                                int beginX, int beginP, int beginR);
 
-long listAllMaximalCliquesDegeneracy( LinkedList** adjList,
-                                      int** adjacencyList, 
+long listAllMaximalCliquesDegeneracy(LinkedList **adjList,
+                                     int **adjacencyList,
                                       #ifdef RETURN_CLIQUES_ONE_BY_ONE
-                                      LinkedList* cliques,
+                                     LinkedList *cliques,
                                       #endif
-                                      int* degree, 
-                                      int size );
+                                     int *degree,
+                                     int size);
 
 #endif

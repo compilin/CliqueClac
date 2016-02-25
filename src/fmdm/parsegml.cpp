@@ -39,8 +39,8 @@ void start(void *data, const char *el, const char **attr) {
 	if (strcmp(el, "node") == 0) {
 		const char *name = getAttr(attr, "id");
 		VertexIdType id = (VertexIdType) pg.ids.size();
-		pg.ids.insert(labToId::value_type(string(name), id));
-		ids.insert(idToLab::value_type(id, string(name)));
+		pg.ids[string(name)] = id;
+		ids[id] = string(name);
 	} else if (strcmp(el, "edge") == 0) {
 		const char *from = getAttr(attr, "source"), *to = getAttr(attr, "target");
 		if (from == NULL || to == NULL) {
@@ -68,6 +68,7 @@ const char *idToLabel(VertexIdType vid) {
 	else {
 		auto buff = new char[20];
 		sprintf(buff, "%lu", (unsigned long) vid);
+		ids[vid] = string(buff);
 		return buff;
 	}
 }

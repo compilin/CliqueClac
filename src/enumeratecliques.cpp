@@ -3,8 +3,9 @@
 //
 
 #include "enumeratecliques.hpp"
+#include "writegraph.hpp"
 
-namespace enumcliques {
+namespace cliqueclac {
 	using namespace fmdm;
 	using namespace std;
 	using boost::dynamic_bitset;
@@ -14,7 +15,7 @@ namespace enumcliques {
 	typedef deque<Node *> NodeList;
 	typedef shared_ptr<NodeList> NodeListPtr;
 
-	size_t getNodeSubgraph(LinkedList **adj, Node node, LinkedList **subadj, map<VertexIdType, Node*> &leafToNode);
+	size_t getNodeSubgraph(LinkedList **adj, Node node, LinkedList **subadj, map<VertexIdType, Node *> &subgToNode);
 
 
 	/**
@@ -39,10 +40,13 @@ namespace enumcliques {
 	}
 
 
-	void calculateCliques(Graph &G, Node &node, map<int, LinkedList*> &cliqueMap) {
-		auto adj = fmdmGraphToStrash(G);
-		LinkedList **subadj = new LinkedList*[G.n];
-		map<VertexIdType, Node*> leafToNode;
+	void calculateCliques(qc::Graph &G, Node &node, map<int, LinkedList *> &cliqueMap, LinkedList **subadj = nullptr) {
+		bool firstCall = false;
+		if (subadj == nullptr) {
+			firstCall = true;
+			subadj = new LinkedList *[G.n];
+		}
+		map<VertexIdType, Node *> leafToNode;
 		if (node.type == LEAF)
 			return;
 		if (node.type == SERIES || node.type == PARALLEL || node.type == PRIME) {
@@ -52,41 +56,66 @@ namespace enumcliques {
 				c = c->suiv;
 			}
 			if (node.type == PRIME) {
-				//cliqueMap[node.id] = move(enumeratePrime(G, node));
-				LinkedList * list = qc::createLinkedList();
-				auto nb = getNodeSubgraph(adj, node, subadj, leafToNode);
+				LinkedList *list = qc::createLinkedList();
+				auto nb = getNodeSubgraph(G.adj, node, subadj, leafToNode);
 				if (nb > INT_MAX)
 					throw runtime_error("Node has too many child for quickcliques to handle (i.e > INT_MAX)");
-				qc::listAllMaximalCliquesDegeneracy(adj, nullptr, list, nullptr, (int) nb);
+				{
+					char fname[32];
+					qc::Graph subg{(int) nb, subadj,
+					               (function<const char *(VertexIdType)>) [&leafToNode, &G](VertexIdType id) {
+						               return G.labels(leafToNode.at(id)->id);
+					               }};
+					sprintf(fname, "subg_%d.graphml", node.id);
+					auto it = getIterator(subg);
+					writeGraph(*it, fname, "GV");
+					delete it;
+				}
+				qc::listAllMaximalCliquesDegeneracy(subadj, nullptr, list, nullptr, (int) nb);
+				cout << "Found " << qc::length(list) << " cliques for Prime node " << node.id << endl;
 
 				qc::Link *el = list->head->next;
 				while (!qc::isTail(el)) {
 					int *dat = (int *) el->data;
 					size_t n = 0;
-					for (int i = 0; dat[i] > -1; i ++)
-						n ++;
-					Node **nodes = new Node*[n+1];
-					for (size_t i = 0; i < n; i ++)
+					for (int i = 0; dat[i] > -1; i++)
+						n++;
+					Node **nodes = new Node *[n + 1];
+					for (size_t i = 0; i < n; i++)
 						nodes[i] = leafToNode[dat[i]];
 					nodes[n] = nullptr;
 
 					el->data = nodes;
-					delete[] dat;
+					free(dat);
+					el = el->next;
 				}
 
 				cliqueMap[node.id] = list;
+				for (size_t i = 0; i < nb; i++) {
+					qc::destroyLinkedList(subadj[i]);
+					subadj[i] = nullptr;
+				}
 			}
 		} else
 			throw std::runtime_error("Error : unknown node type in enumerateClique");
+		if (firstCall) {
+			delete[] subadj;
+		}
 	}
 
 
-	CliqueList enumerateCliques(Graph &G, Node &node) {
+	CliqueList enumerateCliques(const Graph &G, Node &node) {
 
-		deque <NodeListPtr> cliquelist; // List of nodes to replace by their children until it's all LEAF nodes
+		deque<NodeListPtr> cliquelist; // List of nodes to replace by their children until it's all LEAF nodes
 		CliqueList doneList; // List of cliques only containing LEAF nodes
-		map<int, LinkedList*> primeMap; // map of Prime node IDs => list of cliques
-		calculateCliques(G, node, primeMap);
+		map<int, LinkedList *> primeMap; // map of Prime node IDs => list of cliques
+		auto qcG = fmdmGraphToStrash(G);
+		{
+			auto it = getIterator(qcG);
+			writeGraph(*it, "graph.graphml", "GV");
+			delete it;
+		}
+		calculateCliques(qcG, node, primeMap);
 //		cout << "calculated "<< primeMap.size() << " Prime nodes' cliques" << endl;
 		cliquelist.push_back(NodeListPtr(new NodeList()));
 		cliquelist.front()->push_back(&node);
@@ -144,7 +173,7 @@ namespace enumcliques {
 						auto newList = NodeListPtr(new NodeList(*cur));
 						newList->pop_front();
 						Node **dat = (Node **) c->data;
-						for (size_t i = 0; dat[i] != nullptr; i ++) {
+						for (size_t i = 0; dat[i] != nullptr; i++) {
 							if (dat[i]->type == LEAF)
 								newList->push_back(dat[i]);
 							else
@@ -161,24 +190,44 @@ namespace enumcliques {
 		return doneList;
 	}
 
+	CliqueList enumerateCliques(const fmdm::Graph &G) {
+		return enumerateCliques(fmdmGraphToStrash(G));
+	}
+
+	CliqueList enumerateCliques(const qc::Graph &G) {
+		auto list = qc::createLinkedList();
+		qc::listAllMaximalCliquesDegeneracy(G.adj, nullptr, list, nullptr, G.n);
+		CliqueList clist;
+		clist.reserve((unsigned long) G.n);
+		for (auto l = list->head->next; !qc::isTail(l); l = l->next) {
+			Clique cli;
+			int *dat = (int *) l->data;
+			for (int i = 0; dat[i] >= 0; i++)
+				cli.push_back(dat[i]);
+			clist.push_back(cli);
+		}
+		return clist;
+	}
+
 	/**
 	 * \brief Converts a Graph structure from fm-dm to quick-clique Adjacency list format
 	 * \param input the Input graph
 	 * \returns a newly-allocated array of LinkedList's containing the graph's adjacency lists
 	 */
-	LinkedList **fmdmGraphToStrash(Graph &input) {
-		LinkedList **adj = new LinkedList*[input.n];
+	qc::Graph fmdmGraphToStrash(const Graph &input) {
+		LinkedList **adj = new LinkedList *[input.n];
+		qc::Graph G{(int) input.n, adj, input.labels};
 
-		for (size_t i = 0; i < (size_t)input.n; i ++) {
+		for (size_t i = 0; i < (size_t) input.n; i++) {
 			adj[i] = qc::createLinkedList();
-			Adj * adjl = input.G[i];
+			Adj *adjl = input.G[i];
 			while (adjl != nullptr) {
-				addLast(adj[i], (void*)adjl->s); // Yeah that's what degeneracy_algorithm.c expects :/
+				addLast(adj[i], (void *) adjl->s); // Yeah that's what degeneracy_algorithm.c expects :/
 				adjl = adjl->suiv;
 			}
 		}
 
-		return adj;
+		return G;
 	}
 
 	/**
@@ -191,19 +240,52 @@ namespace enumcliques {
 	 * Note that no data is copied, only pointers, so that LinkedList's in subadj are the same than the ones in adj for
 	 * corresponding nodes
 	 */
-	size_t getNodeSubgraph(LinkedList **adj, Node node, LinkedList **subadj, map<VertexIdType, Node*> &leafToNode) {
-		leafToNode.clear();
+	size_t getNodeSubgraph(LinkedList **adj, Node node, LinkedList **subadj, map<VertexIdType, Node *> &subgToNode) {
+		subgToNode.clear();
 		auto ch = node.fils;
-		size_t n = 0;
+		map<VertexIdType, VertexIdType> leafToSubg;
+		map<int, VertexIdType> nodeToLeaf;
+		size_t n = 0, nb;
 		while (ch != nullptr) {
 			VertexIdType id = getAnyLeaf(ch->pointe);
-			leafToNode[id] = ch->pointe;
-			subadj[n] = adj[id];
-			n ++;
+			subgToNode[n] = ch->pointe;
+			nodeToLeaf[ch->pointe->id] = id;
+			leafToSubg[id] = n;
+			n++;
 			ch = ch->suiv;
+		}
+		nb = n;
+
+		for (n = 0; n < nb; n++) {
+
+			//auto node = leafToNode[n];
+			auto leaf = nodeToLeaf[subgToNode[n]->id];
+			auto nadj = subadj[n] = qc::createLinkedList();
+			qc::Link *neigh;
+			for (neigh = adj[leaf]->head->next; !qc::isTail(neigh); neigh = neigh->next) {
+				auto it = leafToSubg.find((VertexIdType) neigh->data);
+				if (it != leafToSubg.end())
+					qc::addLast(nadj, (void *) it->second);
+			}
 		}
 
 		return n;
 	}
 
+	void sortCliqueList(CliqueList &list) {
+		for (auto &cli : list) {
+			sort(cli.begin(), cli.end());
+		}
+		sort(list.begin(), list.end(), [](const Clique &c1, const Clique &c2) {
+			for (int i = 0; i < c1.size() && i < c2.size(); i++) {
+				if (c1[i] < c2[i])
+					return true;
+				if (c1[i] > c2[i])
+					return false;
+				// if == continue
+			}
+			// If no element is different until min(c1.size(), c2.size()), return whether c1 is smaller than c2
+			return (c1.size() < c2.size());
+		});
+	}
 }
