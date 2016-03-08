@@ -6,15 +6,40 @@
 
 #include "writegraph.hpp"
 
-using fmdm::VertexIdType;
-using fmdm::NodeType;
 
 namespace cliqueclac {
 	using namespace std;
+	using fmdm::VertexIdType;
+	using fmdm::NodeType;
+	namespace md = moddecomp;
 	namespace qc = quickcliques;
 
-	class MDTreeAdjIterator : public AdjacencyIterator {
-		friend class MDTreeIterator;
+
+	char *MDNodeLabel(char *dst, VertexIdType id, VertexIdType leafID, NodeType type, qc::labelFunction labelf) {
+		switch (type) {
+			case NodeType::LEAF: {
+				const char *lab = labelf(leafID);
+				sprintf(dst, "%s", lab);
+				break;
+			}
+			case NodeType::PRIME:
+				sprintf(dst, "Prime %ld", id);
+				break;
+			case NodeType::PARALLEL:
+				sprintf(dst, "&#8741;%ld", id);
+				break;
+			case NodeType::SERIES:
+				sprintf(dst, "&#8864;%ld", id);
+				break;
+			default:
+				cerr << "Error : unknown node type " << type << endl;
+				sprintf(dst, "ERROR %ld", id);
+		}
+		return dst;
+	}
+
+	class FMDMMDTreeAdjIterator : public AdjacencyIterator {
+		friend class FMDMMDTreeIterator;
 
 	public:
 		void reset() { curr = first; }
@@ -29,20 +54,20 @@ namespace cliqueclac {
 		}
 
 	private:
-		MDTreeAdjIterator(fmdm::Node *node) { curr = first = node->fils; }
+		FMDMMDTreeAdjIterator(fmdm::Node *node) { curr = first = node->fils; }
 
 		fmdm::child *first, *curr;
 	};
 
-	class MDTreeIterator : public GraphIterator {
+	class FMDMMDTreeIterator : public GraphIterator {
 	public:
-		MDTreeIterator(fmdm::Node *root, fmdm::labelFunction labelf) {
+		FMDMMDTreeIterator(fmdm::Node *root, qc::labelFunction labelf) {
 			this->root = root;
 			this->labelf = labelf;
 			reset();
 		}
 
-		~MDTreeIterator() { };
+		~FMDMMDTreeIterator() { };
 
 		void reset() {
 			curr = root;
@@ -77,30 +102,13 @@ namespace cliqueclac {
 		char *label(char *dst, VertexIdType id) {
 			auto it = nodes.find(id);
 			if (it != nodes.end()) {
-				switch (it->second->type) {
-					case NodeType::LEAF: {
-						const char *lab = labelf(it->second->nom);
-						sprintf(dst, "%s", lab);
-						break;
-					}
-					case NodeType::PRIME:
-						sprintf(dst, "Prime %ld", id);
-						break;
-					case NodeType::PARALLEL:
-						sprintf(dst, "&#8741;%ld", id);
-						break;
-					case NodeType::SERIES:
-						sprintf(dst, "&#8864;%ld", id);
-						break;
-					default:
-						cerr << "Error : unknown node type " << it->second->type << endl;
-						sprintf(dst, "ERROR %ld", id);
-				}
-			}
+				dst = MDNodeLabel(dst, id, it->second->nom, it->second->type, labelf);
+			} else
+				throw runtime_error("Node id not found");
 			return dst;
 		}
 
-		MDTreeAdjIterator *getAdjacency(VertexIdType id) { return new MDTreeAdjIterator(nodes.at(id)); }
+		FMDMMDTreeAdjIterator *getAdjacency(VertexIdType id) { return new FMDMMDTreeAdjIterator(nodes.at(id)); }
 
 		NodeType getType(VertexIdType id) {
 			return nodes.at(id)->type;
@@ -112,7 +120,7 @@ namespace cliqueclac {
 		map<VertexIdType, fmdm::Node *> nodes;
 		fmdm::Node *root;
 		fmdm::Node *curr;
-		fmdm::labelFunction labelf;
+		quickcliques::labelFunction labelf;
 	};
 
 	class QCGraphAdjIterator : public AdjacencyIterator {
@@ -184,6 +192,26 @@ namespace cliqueclac {
 		VertexIdType curr;
 	};
 
+/*
+	class MDTreeAdjIterator : public AdjacencyIterator {
+	public:
+	private:
+
+	};
+
+	class MDTreeIterator : public GraphIterator {
+	public:
+		MDTreeIterator(md::MDTreeNode &root, qc::labelFunction labelf) : root(root), labelf(labelf) { reset(); };
+		void reset() override {
+
+		}
+	private:
+		map<VertexIdType, md::MDTreeNode*> nodes;
+		md::MDTreeNode &root;
+		qc::labelFunction labelf;
+	};
+*/
+
 	void writeGraphGML(ostream &out, GraphIterator &G) {
 		out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 				"<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">\n"
@@ -246,9 +274,9 @@ namespace cliqueclac {
 		delete[] label;
 	}
 
-	void writeGraph(GraphIterator &G, ostream &out, string format, GraphAttributes *attr, string title) {
+	void writeGraph(std::shared_ptr<GraphIterator> G, ostream &out, string format, GraphAttributes *attr, string title) {
 		if (format == "GML" || format == "XML" || format == "GraphML") {
-			writeGraphGML(out, G);
+			writeGraphGML(out, *G);
 		} else if (format == "GV" || format == "GraphViz") {
 			GraphAttributes defattrs;
 			defattrs.nodes["style"] = "filled";
@@ -268,20 +296,20 @@ namespace cliqueclac {
 				defattrs.nodes.insert(attr->nodes.begin(), attr->nodes.end());
 				defattrs.edges.insert(attr->edges.begin(), attr->edges.end());
 			}
-			writeGraphGV(out, G, &defattrs, title);
+			writeGraphGV(out, *G, &defattrs, title);
 		} else
 			throw runtime_error("Unknown graph format. Refer to doc for recognized formats.");
 	}
 
-	void writeGraph(GraphIterator &G, string outname, string format, GraphAttributes *attr, string title) {
+	void writeGraph(std::shared_ptr<GraphIterator> G, string outname, string format, GraphAttributes *attr, string title) {
 		ofstream out(outname);
 		writeGraph(G, out, format, attr, title);
 		out.flush();
 		out.close();
 	}
 
-	GraphIterator *getIterator(fmdm::Node *root, fmdm::labelFunction label) {
-		return new MDTreeIterator(root, label);
+	shared_ptr <GraphIterator> getIterator(fmdm::Node *root, qc::labelFunction label) {
+		return shared_ptr<GraphIterator>(new FMDMMDTreeIterator(root, label));
 	}
 
 
@@ -289,7 +317,12 @@ namespace cliqueclac {
 //		throw runtime_error("Unimplemented!");
 //	}
 
-	GraphIterator *getIterator(qc::Graph &graph) {
-		return new QCGraphIterator(graph);
+	shared_ptr <GraphIterator> getIterator(qc::Graph &graph) {
+		return shared_ptr<GraphIterator>(new QCGraphIterator(graph));
 	}
+
+
+/*	std::shared_ptr<GraphIterator> getIterator(md::MDTreeNode &root, quickcliques::labelFunction label) {
+
+	}*/
 }

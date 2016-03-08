@@ -1,6 +1,11 @@
 #ifndef _DJS_LINKEDLIST_H_
 #define _DJS_LINKEDLIST_H_
 
+#ifdef __cplusplus
+namespace quickcliques {
+	extern "C" {
+#endif
+
 /* 
     This program is free software: you can redistribute it and/or modify 
     it under the terms of the GNU General Public License as published by 
@@ -42,12 +47,11 @@ struct Link;
 
 */
 
-struct LinkedList
-{
-    struct Link* head; //!< head of the linked list, a dummy sentinel
-    struct Link* tail; //!< tail of the linked list, a dummy sentinel
+struct LinkedList {
+	struct Link *head; //!< head of the linked list, a dummy sentinel
+	struct Link *tail; //!< tail of the linked list, a dummy sentinel
 #ifdef SMARTLENGTH
-    int length; //!< the number of data items in the linked list, if we are maintaining it.
+	int length; //!< the number of data items in the linked list, if we are maintaining it.
 #endif
 };
 
@@ -57,13 +61,12 @@ struct LinkedList
 
 */
 
-struct Link
-{
-    void* data; //!< arbitrary data stored in the link
-    struct Link* next; //!< the previous link in the chain
-    struct Link* prev; //!< the next link in the chain
+struct Link {
+	void *data; //!< arbitrary data stored in the link
+	struct Link *next; //!< the previous link in the chain
+	struct Link *prev; //!< the next link in the chain
 #ifdef SMARTLENGTH
-    struct LinkedList* linkedList; //!< the linked list that this link belongs to.
+	struct LinkedList* linkedList; //!< the linked list that this link belongs to.
 #endif
 };
 
@@ -71,53 +74,58 @@ typedef struct Link Link;
 
 typedef struct LinkedList LinkedList;
 
-int isHead(Link* list);
+int isHead(Link *list);
 
-int isTail(Link* list);
+int isTail(Link *list);
 
-void* deleteLink(Link* list);
+void *deleteLink(Link *list);
 
-Link* addAfter(Link* list, void* data);
+Link *addAfter(Link *list, void *data);
 
-Link* addBefore(Link* list, void* data);
+Link *addBefore(Link *list, void *data);
 
-void addLinkBefore(Link* list, Link* newLink);
+void addLinkBefore(Link *list, Link *newLink);
 
-Link* removeLink(Link* list);
+Link *removeLink(Link *list);
 
-LinkedList* createLinkedList(void);
+LinkedList *createLinkedList(void);
 
-void destroyLinkedList(LinkedList* linkedList);
+void destroyLinkedList(LinkedList *linkedList);
 
-void copyLinkedList(LinkedList* destination, 
-                    LinkedList* source);
+void copyLinkedList(LinkedList *destination,
+                    LinkedList *source);
 
-int contains(LinkedList* linkedList, void* data, int (*comparator)(void*,void*));
+int contains(LinkedList *linkedList, void *data, int (*comparator)(void *, void *));
 
-int equal( LinkedList* list1, 
-           LinkedList* list2, 
-           int (*comparator)(void*,void*));
+int equal(LinkedList *list1,
+          LinkedList *list2,
+          int (*comparator)(void *, void *));
 
-void restoreLinksWithReferences(LinkedList* list);
+void restoreLinksWithReferences(LinkedList *list);
 
-Link* addFirst(LinkedList* linkedList, void* data);
+Link *addFirst(LinkedList *linkedList, void *data);
 
-Link* addLast(LinkedList* linkedList, void* data);
+Link *addLast(LinkedList *linkedList, void *data);
 
-Link* removeFirst(LinkedList* linkedList);
+Link *removeFirst(LinkedList *linkedList);
 
-Link* removeLast(LinkedList* linkedList);
+Link *removeLast(LinkedList *linkedList);
 
-void deleteLast(LinkedList* linkedList);
+void deleteLast(LinkedList *linkedList);
 
-void* getFirst(LinkedList* linkedList);
+void *getFirst(LinkedList *linkedList);
 
-void printListAbbv(LinkedList* linkedList, void (*printFunc)(void*));
+void printListAbbv(LinkedList *linkedList, void (*printFunc)(void *));
 
-void printList(LinkedList* linkedList, void (*printFunc)(void*));
+void printList(LinkedList *linkedList, void (*printFunc)(void *));
 
-int length(LinkedList* linkedList);
+int length(LinkedList *linkedList);
 
-int isEmpty(LinkedList* linkedList);
+int isEmpty(LinkedList *linkedList);
+
+#ifdef __cplusplus
+	}
+}
+#endif
 
 #endif

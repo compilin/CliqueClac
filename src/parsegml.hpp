@@ -9,7 +9,7 @@
 #include <expat.h>
 #include <unordered_map>
 #include <vector>
-#include "dm.hpp"
+#include "fmdm/dm_english.h"
 
 fmdm::Graph parsegml(char *filename, bool verb = false);
 

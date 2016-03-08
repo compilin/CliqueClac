@@ -21,8 +21,17 @@
 #include<stdlib.h>
 #include<string.h>
 
-#include"misc.h"
 #include"LinkedList.h"
+
+#ifdef __cplusplus
+
+#include <functional>
+
+namespace quickcliques {
+	extern "C" {
+#endif
+
+#include"misc.h"
 #include"MemoryManager.h"
 #include"degeneracy_helper.h"
 
@@ -59,5 +68,20 @@ long listAllMaximalCliquesDegeneracy(LinkedList **adjList,
                                       #endif
                                      int *degree,
                                      int size);
+
+#ifdef __cplusplus
+
+}
+
+	typedef std::function<const char *(long)> labelFunction;
+
+	typedef struct graph {
+		int n;
+		LinkedList **adj;
+		labelFunction labels;
+	} Graph;
+}
+#endif
+
 
 #endif

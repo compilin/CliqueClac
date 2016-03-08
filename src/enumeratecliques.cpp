@@ -2,8 +2,8 @@
 // Created by Lauréline Nevin <git@compilin.dev> on 12/02/16.
 //
 
-#include "enumeratecliques.hpp"
 #include "writegraph.hpp"
+#include "enumeratecliques.hpp"
 
 namespace cliqueclac {
 	using namespace fmdm;
@@ -40,7 +40,7 @@ namespace cliqueclac {
 	}
 
 
-	void calculateCliques(qc::Graph &G, Node &node, map<int, LinkedList *> &cliqueMap, LinkedList **subadj = nullptr) {
+	void calculateCliques(const qc::Graph &G, Node &node, map<int, LinkedList *> &cliqueMap, LinkedList **subadj) {
 		bool firstCall = false;
 		if (subadj == nullptr) {
 			firstCall = true;
@@ -52,7 +52,7 @@ namespace cliqueclac {
 		if (node.type == SERIES || node.type == PARALLEL || node.type == PRIME) {
 			Child *c = node.fils;
 			while (c != nullptr) {
-				calculateCliques(G, *c->pointe, cliqueMap);
+				calculateCliques(G, *c->pointe, cliqueMap, subadj);
 				c = c->suiv;
 			}
 			if (node.type == PRIME) {
@@ -60,19 +60,18 @@ namespace cliqueclac {
 				auto nb = getNodeSubgraph(G.adj, node, subadj, leafToNode);
 				if (nb > INT_MAX)
 					throw runtime_error("Node has too many child for quickcliques to handle (i.e > INT_MAX)");
-				{
+#ifdef PRINTGRAPHS
 					char fname[32];
 					qc::Graph subg{(int) nb, subadj,
 					               (function<const char *(VertexIdType)>) [&leafToNode, &G](VertexIdType id) {
 						               return G.labels(leafToNode.at(id)->id);
 					               }};
-					sprintf(fname, "subg_%d.graphml", node.id);
-					auto it = getIterator(subg);
-					writeGraph(*it, fname, "GV");
-					delete it;
-				}
+					sprintf(fname, "subg_%d.gv", node.id);
+					writeGraph(getIterator(subg), fname, "GV");
+					cout << "Wrote virtual graph for node "<< node.id <<" to "<< fname<<endl;
+#endif
 				qc::listAllMaximalCliquesDegeneracy(subadj, nullptr, list, nullptr, (int) nb);
-				cout << "Found " << qc::length(list) << " cliques for Prime node " << node.id << endl;
+				//cout << "Found " << qc::length(list) << " cliques for Prime node " << node.id << endl;
 
 				qc::Link *el = list->head->next;
 				while (!qc::isTail(el)) {
@@ -104,23 +103,21 @@ namespace cliqueclac {
 	}
 
 
-	CliqueList enumerateCliques(const Graph &G, Node &node) {
+	CliqueList enumerateCliques(const qc::Graph &G, Node &node) {
 
 		deque<NodeListPtr> cliquelist; // List of nodes to replace by their children until it's all LEAF nodes
 		CliqueList doneList; // List of cliques only containing LEAF nodes
 		map<int, LinkedList *> primeMap; // map of Prime node IDs => list of cliques
-		auto qcG = fmdmGraphToStrash(G);
-		{
-			auto it = getIterator(qcG);
-			writeGraph(*it, "graph.graphml", "GV");
-			delete it;
-		}
-		calculateCliques(qcG, node, primeMap);
+#ifdef PRINTGRAPHS
+			writeGraph(getIterator(qcG), "graph.graphml", "GV");
+#endif
+		calculateCliques(G, node, primeMap, nullptr);
 //		cout << "calculated "<< primeMap.size() << " Prime nodes' cliques" << endl;
 		cliquelist.push_back(NodeListPtr(new NodeList()));
 		cliquelist.front()->push_back(&node);
 
 		while (!cliquelist.empty()) {
+			//cout << doneList.size() << " cliques done, "<< cliquelist.size() << " to process" << endl;
 			NodeList *cur = &*cliquelist.front();
 			if (cur->front()->type == LEAF) { // Leafs are at the end, thus this is a leaf-only list
 //				cout << "Clique done : ";
@@ -188,10 +185,6 @@ namespace cliqueclac {
 
 
 		return doneList;
-	}
-
-	CliqueList enumerateCliques(const fmdm::Graph &G) {
-		return enumerateCliques(fmdmGraphToStrash(G));
 	}
 
 	CliqueList enumerateCliques(const qc::Graph &G) {
@@ -263,7 +256,7 @@ namespace cliqueclac {
 			auto nadj = subadj[n] = qc::createLinkedList();
 			qc::Link *neigh;
 			for (neigh = adj[leaf]->head->next; !qc::isTail(neigh); neigh = neigh->next) {
-				auto it = leafToSubg.find((VertexIdType) neigh->data);
+				auto it = leafToSubg.find((VertexIdType&) neigh->data);
 				if (it != leafToSubg.end())
 					qc::addLast(nadj, (void *) it->second);
 			}
@@ -277,7 +270,7 @@ namespace cliqueclac {
 			sort(cli.begin(), cli.end());
 		}
 		sort(list.begin(), list.end(), [](const Clique &c1, const Clique &c2) {
-			for (int i = 0; i < c1.size() && i < c2.size(); i++) {
+			for (size_t i = 0; i < c1.size() && i < c2.size(); i++) {
 				if (c1[i] < c2[i])
 					return true;
 				if (c1[i] > c2[i])

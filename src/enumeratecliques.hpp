@@ -7,9 +7,9 @@
 #include <iostream>
 #include <map>
 #include <deque>
-#include "quick-cliques/degeneracy_algorithm.hpp"
+#include "quick-cliques/degeneracy_algorithm.h"
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include "fmdm/dm.hpp"
+#include "fmdm/dm_english.h"
 
 namespace cliqueclac {
 	/**
@@ -26,9 +26,7 @@ namespace cliqueclac {
 	typedef std::vector<Clique> CliqueList;
 
 
-	CliqueList enumerateCliques(const fmdm::Graph &G, fmdm::Node &node);
-
-	CliqueList enumerateCliques(const fmdm::Graph &G);
+	CliqueList enumerateCliques(const quickcliques::Graph &G, fmdm::Node &node);
 
 	CliqueList enumerateCliques(const quickcliques::Graph &G);
 

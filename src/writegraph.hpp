@@ -7,9 +7,11 @@
 
 #include <fstream>
 #include <map>
-#include "fmdm/dm.hpp"
+#include <memory>
 
-#include "quick-cliques/degeneracy_algorithm.hpp"
+#include "moddecomp.hpp"
+#include "fmdm/dm_english.h"
+#include "quick-cliques/degeneracy_algorithm.h"
 
 namespace cliqueclac {
 
@@ -62,17 +64,19 @@ namespace cliqueclac {
 		virtual bool isDirected() = 0;
 	};
 
-	void writeGraph(GraphIterator &G, std::ostream &out, std::string format,
+	void writeGraph(std::shared_ptr<GraphIterator> G, std::ostream &out, std::string format,
 	                GraphAttributes *attr = nullptr, std::string title = "");
 
-	void writeGraph(GraphIterator &G, std::string outname, std::string format,
+	void writeGraph(std::shared_ptr<GraphIterator> G, std::string outname, std::string format,
 	                GraphAttributes *attr = nullptr, std::string title = "");
 
-	GraphIterator *getIterator(fmdm::Node *root, fmdm::labelFunction label);
+	std::shared_ptr<GraphIterator> getIterator(fmdm::Node *root, quickcliques::labelFunction label);
 
 	//GraphIterator *getIterator(fmdm::Graph &graph);
 
-	GraphIterator *getIterator(quickcliques::Graph &graph);
+	//std::shared_ptr<GraphIterator> getIterator(moddecomp::MDTreeNode &root, quickcliques::labelFunction label);
+
+	std::shared_ptr<GraphIterator> getIterator(quickcliques::Graph & graph);
 }
 
 #endif //CLIQUECLAC_WRITEGRAPH_H
