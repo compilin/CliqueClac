@@ -1,11 +1,11 @@
 #include <iostream>
 #include <sys/resource.h>
-#include "parsegml.hpp"
+#include "parsegraphml.hpp"
 #include "enumeratecliques.hpp"
 #include "writegraph.hpp"
 
-#define MSECONDS(time) (((time) * timeratio * 1000.))
-#define VERBOSE string("file")
+#define MSECONDS(time) (((time) * 1e-09))
+#define VERBOSE string("no")
 
 //static const rlim_t MAX_MEM = ;
 
@@ -46,7 +46,6 @@ int main(int argc, char **argv) {
 		clock_getres(CLOCK_PROCESS_CPUTIME_ID, &spec);
 		timeratio = spec.tv_sec + (spec.tv_nsec / 1000000000.);
 	}
-
 
 	cout << "Enumerating cliques without MD" << endl;
 	auto time = -clock();

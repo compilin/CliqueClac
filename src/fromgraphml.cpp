@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "fmdm/parsegml.hpp"
+#include "parsegraphml.hpp"
 #include "writegraph.hpp"
 
 using namespace fmdm;
@@ -19,7 +19,6 @@ int main(int narg, char **arg) {
     if (narg > 2 && strcmp(arg[2], "-v") == 0)
         printarbre(R, G.labels);
     if (narg > 3 && strcmp(arg[3], "-w") == 0) {
-        auto gi = cliqueclac::getIterator(R, G.labels);
-        cliqueclac::writeGraph(*gi, "mdtree.gv", "GV");
+        cliqueclac::writeGraph(cliqueclac::getIterator(R, G.labels), "mdtree.gv", "GV");
     }
 }

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <functional>
-#include "parsegml.hpp"
+#include "parsegraphml.hpp"
 
 
 using namespace std;
@@ -33,14 +33,26 @@ const char *getAttr(const char **attr, string name) {
 	return NULL;
 }
 
+static bool isLabel = false;
+
+void startText(void *userData, const XML_Char *s, int len) {
+	if (isLabel) {
+		ParseGraph &pg = *(ParseGraph *) userData;
+		VertexIdType id = (VertexIdType) pg.ids.size()-1;
+		ids[id] = string(s, (unsigned long) len);
+	}
+}
+
 void start(void *data, const char *el, const char **attr) {
 	ParseGraph &pg = *(ParseGraph *) data;
-
+	isLabel = false;
 	if (strcmp(el, "node") == 0) {
 		const char *name = getAttr(attr, "id");
 		VertexIdType id = (VertexIdType) pg.ids.size();
 		pg.ids[string(name)] = id;
 		ids[id] = string(name);
+	} else if (strcmp(el, "y:NodeLabel") == 0 && pg.ids.size() > 0) {
+		isLabel = true;
 	} else if (strcmp(el, "edge") == 0) {
 		const char *from = getAttr(attr, "source"), *to = getAttr(attr, "target");
 		if (from == NULL || to == NULL) {
@@ -77,6 +89,7 @@ Graph parsegml(char *filename, bool verb) {
 
 	XML_Parser parser = XML_ParserCreate("UTF-8");
 	XML_SetStartElementHandler(parser, start);
+	XML_SetCharacterDataHandler(parser, startText);
 	ParseGraph pg;
 	XML_SetUserData(parser, &pg);
 
