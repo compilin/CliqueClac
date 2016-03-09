@@ -4,6 +4,8 @@
 
 #include "writegraph.hpp"
 #include "enumeratecliques.hpp"
+#include <sys/resource.h>
+#define MSECONDS(time) (((time) * 1e-09))
 
 namespace cliqueclac {
 	using namespace fmdm;
@@ -56,8 +58,11 @@ namespace cliqueclac {
 				c = c->suiv;
 			}
 			if (node.type == PRIME) {
+				cout << "Calculating cliques for subgraph ";
+				long time = -clock();
 				LinkedList *list = qc::createLinkedList();
 				auto nb = getNodeSubgraph(G.adj, node, subadj, leafToNode);
+				cout << "of size "<< nb <<", getNodeSubgraph:" << MSECONDS(time + clock()) << endl;
 				if (nb > INT_MAX)
 					throw runtime_error("Node has too many child for quickcliques to handle (i.e > INT_MAX)");
 #ifdef PRINTGRAPHS
@@ -70,8 +75,10 @@ namespace cliqueclac {
 					writeGraph(getIterator(subg), fname, "GV");
 					cout << "Wrote virtual graph for node "<< node.id <<" to "<< fname<<endl;
 #endif
+				time = -clock();
 				qc::listAllMaximalCliquesDegeneracy(subadj, nullptr, list, nullptr, (int) nb);
-				//cout << "Found " << qc::length(list) << " cliques for Prime node " << node.id << endl;
+				cout << "Found " << qc::length(list) << " cliques for Prime node " << node.id << " in "<<
+						MSECONDS(time + clock()) << "ms" << endl;
 
 				qc::Link *el = list->head->next;
 				while (!qc::isTail(el)) {
@@ -111,8 +118,9 @@ namespace cliqueclac {
 #ifdef PRINTGRAPHS
 			writeGraph(getIterator(qcG), "graph.graphml", "GV");
 #endif
+		auto time = -clock();
 		calculateCliques(G, node, primeMap, nullptr);
-//		cout << "calculated "<< primeMap.size() << " Prime nodes' cliques" << endl;
+		cout << "calculated "<< primeMap.size() << " Prime nodes' cliques in "<< MSECONDS(time + clock()) <<"ms"<< endl;
 		cliquelist.push_back(NodeListPtr(new NodeList()));
 		cliquelist.front()->push_back(&node);
 
